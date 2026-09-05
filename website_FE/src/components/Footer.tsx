@@ -170,9 +170,24 @@ export default function Footer({ setCurrentPage }: FooterProps) {
 
         {/* Lower copyright bar */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-10 font-mono text-[10px] text-neutral-500">
-          <span>
-            © {new Date().getFullYear()} {PHOTOGRAPHER_NAME}. All rights reserved.
-          </span>
+          <div className="flex flex-wrap items-center gap-2">
+            <span>
+              © {new Date().getFullYear()} {PHOTOGRAPHER_NAME}. All rights reserved.
+            </span>
+            <span>•</span>
+            <span>
+              Powered by{' '}
+              <a
+                href="https://kasapaai.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-amber-400 hover:text-amber-300 font-semibold hover:underline transition-colors inline-flex items-center gap-1 cursor-pointer"
+                title="Visit Kasapa AI"
+              >
+                kasapaai.com
+              </a>
+            </span>
+          </div>
           <div className="flex items-center space-x-4">
             <span>Archival Giclée Fine Art Prints Available</span>
             <span>•</span>
