@@ -45,30 +45,50 @@ export default function AdminLoginModal({ onOpenClientVault }: AdminLoginModalPr
   const [isDemoUnlocked, setIsDemoUnlocked] = useState(false);
   const [selectedAccountId, setSelectedAccountId] = useState<string | null>(null);
 
-  const [isSuperAdminEverUnlocked, setIsSuperAdminEverUnlocked] = useState(false);
-
-  // Check if credentials match the secret unlock: demo / kgdemo, or Super Admin: Original / Jay1224
+  // Reset modal state when closed
   useEffect(() => {
-    if (username.trim().toLowerCase() === 'demo' && password === 'kgdemo') {
+    if (!showLoginModal) {
+      setUsername('');
+      setPassword('');
+      setError('');
+      setSuccessNotice('');
+      setIsDemoUnlocked(false);
+      setSelectedAccountId(null);
+    }
+  }, [showLoginModal]);
+
+  // Check if credentials match the secret unlock: demo / kgdemo (or "kg demo"), or Super Admin: Original / Jay1224
+  useEffect(() => {
+    const cleanUser = username.trim().toLowerCase();
+    const cleanPass = password.trim().toLowerCase().replace(/[\s-_]+/g, '');
+
+    if (cleanUser === 'demo' && cleanPass === 'kgdemo') {
       setIsDemoUnlocked(true);
-      setSuccessNotice('Demo mode unlocked! Demo profiles revealed below.');
+      setSuccessNotice('Demo mode unlocked! Standard demo profiles revealed below.');
       setError('');
     }
 
-    if (username.trim().toLowerCase() === 'original' && password.trim() === 'Jay1224') {
-      setIsSuperAdminEverUnlocked(true);
+    const isSuperAdminMatch =
+      (cleanUser === 'original' || cleanUser === 'superadmin') &&
+      (password.trim() === 'Jay1224' ||
+        (Boolean(systemSettings.superAdminPasscode) && password.trim() === systemSettings.superAdminPasscode));
+
+    if (isSuperAdminMatch) {
       setIsDemoUnlocked(true);
-      setSuccessNotice('Super Admin (Original) credentials unlocked!');
+      setSuccessNotice('Super Admin (Original) credentials authenticated!');
       setError('');
     }
-  }, [username, password]);
+  }, [username, password, systemSettings.superAdminPasscode]);
 
   if (!showLoginModal) return null;
 
-  // Super Admin is hidden until username is 'Original' and password is 'Jay1224'
+  // Super Admin is hidden until username and password match Super Admin credentials
+  const cleanUser = username.trim().toLowerCase();
+  const cleanPass = password.trim();
   const isSuperAdminUnlocked =
-    isSuperAdminEverUnlocked ||
-    (username.trim().toLowerCase() === 'original' && password.trim() === 'Jay1224');
+    (cleanUser === 'original' || cleanUser === 'superadmin') &&
+    (cleanPass === 'Jay1224' ||
+      (Boolean(systemSettings.superAdminPasscode) && cleanPass === systemSettings.superAdminPasscode));
 
   const demoAccounts: DemoAccount[] = [
     {
@@ -100,8 +120,8 @@ export default function AdminLoginModal({ onOpenClientVault }: AdminLoginModalPr
             name: 'Super Admin (Original)',
             role: 'super_admin' as UserRole,
             roleLabel: 'Master System Setup',
-            username: 'Original',
-            passcode: 'Jay1224',
+            username: username.trim() || 'Original',
+            passcode: password.trim() || systemSettings.superAdminPasscode || 'Jay1224',
             description: 'Full master privileges, API credentials, SMS & Paystack configuration',
             icon: Crown,
             badgeColor: 'bg-amber-400 text-neutral-950 font-black'
@@ -146,8 +166,11 @@ export default function AdminLoginModal({ onOpenClientVault }: AdminLoginModalPr
     e.preventDefault();
     setError('');
 
-    // Secret demo trigger submitted directly
-    if (username.trim().toLowerCase() === 'demo' && password.trim() === 'kgdemo') {
+    // Secret demo trigger submitted directly (supports "kgdemo", "kg demo", etc.)
+    const cleanUser = username.trim().toLowerCase();
+    const cleanPass = password.trim().toLowerCase().replace(/[\s-_]+/g, '');
+
+    if (cleanUser === 'demo' && cleanPass === 'kgdemo') {
       setIsDemoUnlocked(true);
       setSuccessNotice('Demo mode activated! Select an account below to login.');
       return;
@@ -237,7 +260,7 @@ export default function AdminLoginModal({ onOpenClientVault }: AdminLoginModalPr
                     setUsername(e.target.value);
                     setError('');
                   }}
-                  placeholder="e.g. admin, editor, or superadmin"
+                  placeholder="e.g. admin or editor"
                   autoFocus
                   className="w-full pl-10 pr-4 py-2.5 bg-neutral-950 border border-neutral-800 rounded-xl text-sm focus:outline-none focus:border-amber-500/60 transition-colors placeholder:text-neutral-600 text-white font-mono"
                 />
@@ -333,30 +356,6 @@ export default function AdminLoginModal({ onOpenClientVault }: AdminLoginModalPr
                 </div>
                 <span className="text-[10px] text-neutral-400 font-mono">Click to auto-populate</span>
               </div>
-
-              {/* Super Admin locked teaser if Original / Jay1224 is not yet provided */}
-              {!isSuperAdminUnlocked && (
-                <div className="p-3 bg-neutral-950/70 border border-neutral-800 rounded-xl flex items-center justify-between text-xs">
-                  <div className="flex items-center space-x-2 text-neutral-400">
-                    <Lock className="w-3.5 h-3.5 text-neutral-500 shrink-0" />
-                    <span className="text-[11px]">
-                      Super Admin locked. Username: <code className="text-amber-400 font-bold">Original</code> & Password: <code className="text-amber-400 font-bold">Jay1224</code>
-                    </span>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setUsername('Original');
-                      setPassword('Jay1224');
-                      setIsSuperAdminEverUnlocked(true);
-                      setSuccessNotice('Super Admin credentials applied!');
-                    }}
-                    className="ml-2 px-2.5 py-1 bg-amber-500/20 hover:bg-amber-500/30 text-amber-400 text-[10px] font-mono rounded border border-amber-500/30 transition-colors cursor-pointer shrink-0 whitespace-nowrap"
-                  >
-                    Unlock Super Admin
-                  </button>
-                </div>
-              )}
 
               {/* Demo Accounts List */}
               <div className="grid grid-cols-1 gap-2 max-h-60 overflow-y-auto pr-1">
