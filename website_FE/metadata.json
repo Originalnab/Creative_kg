@@ -1,0 +1,6 @@
+{
+  "name": "Photography Portfolio",
+  "description": "A stunning, highly responsive professional photography and film portfolio website for Creative KG, showcasing high-resolution Portrait, Wedding, Editorial, Fashion, and Fine Art collections.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

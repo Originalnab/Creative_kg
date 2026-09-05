@@ -1,0 +1,10 @@
+website_FE/node_modules
+website_FE/dist
+node_modules
+.git
+.gitignore
+.env.local
+*.log
+npm-debug.log*
+.DS_Store
+Thumbs.db

@@ -1,0 +1,24 @@
+services:
+  frontend:
+    build:
+      context: ./website_FE
+      dockerfile: Dockerfile
+    container_name: creativekg-prod
+    restart: always
+    ports:
+      # Bound to localhost port 8094 for Nginx Proxy Manager upstream routing
+      - "127.0.0.1:${PORT:-8094}:80"
+    volumes:
+      - media_cache:/var/cache/nginx/creativekg_media
+    environment:
+      - NODE_ENV=production
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/"]
+      interval: 20s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+
+volumes:
+  media_cache:
+    name: creativekg_media_cache_prod

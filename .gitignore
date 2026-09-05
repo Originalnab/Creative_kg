@@ -1,0 +1,7 @@
+website_FE/node_modules
+website_FE/dist
+website_FE/.env
+node_modules
+dist
+.env
+*.log
